@@ -118,14 +118,14 @@ jobs:
           sarif_file: trivy-image.sarif
 
       # Optional: push to registry (GHCR) if you want an external image registry
-      - name: Optional: Push to GHCR (uncomment to enable)
+      - name: Optional Push to GHCR (uncomment to enable)
         if: false
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Optional: Push image (uncomment to enable)
+      - name: Optional Push image (uncomment to enable)
         if: false
         run: docker tag $IMAGE ghcr.io/${{ github.repository }}:latest && docker push ghcr.io/${{ github.repository }}:latest
 
