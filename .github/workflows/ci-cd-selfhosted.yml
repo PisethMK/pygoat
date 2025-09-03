@@ -76,14 +76,6 @@ jobs:
             echo "hadolint not present on runner — skipping (install on runner for lint)."
           fi
 
-      - name: Optional Semgrep (if token available)
-        if: secrets.SEMGREP_APP_TOKEN != ''
-        uses: returntocorp/semgrep-action@v1
-        with:
-          config: p/ci
-        env:
-          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
-
   build-and-deploy:
     name: Build, Scan, Push (optional), Deploy (local)
     runs-on: self-hosted
