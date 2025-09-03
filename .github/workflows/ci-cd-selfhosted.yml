@@ -53,7 +53,7 @@ jobs:
       - name: Convert Bandit JSON to SARIF
         run: |
           pip install sarif-tools
-          sarif-tools from-bandit bandit.json bandit.sarif
+          python -m sarif_tools.from_bandit bandit.json bandit.sarif
       
       - name: Upload Bandit SARIF
         uses: github/codeql-action/upload-sarif@v3
