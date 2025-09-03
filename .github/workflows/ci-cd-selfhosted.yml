@@ -47,9 +47,14 @@ jobs:
             echo "No tests detected or tests failed (continue)"; true
           fi
 
-      - name: Bandit SAST
+      - name: Run Bandit SAST (JSON)
+        run: bandit -r . -f json -o bandit.json || true
+
+      - name: Convert Bandit JSON to SARIF
         run: |
-          bandit -r . -f sarif -o bandit.sarif  || true
+          pip install sarif-tools
+          sarif-tools from-bandit bandit.json bandit.sarif
+      
       - name: Upload Bandit SARIF
         uses: github/codeql-action/upload-sarif@v3
         with:
