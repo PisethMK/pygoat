@@ -44,19 +44,10 @@ jobs:
           fi
         shell: bash
 
-      - name: Debug SONAR_TOKEN presence
-        run: |
-          if [ -z "$SONAR_TOKEN" ]; then
-            echo "❌ SONAR_TOKEN is not set"
-          else
-            echo "✅ SONAR_TOKEN is set (hidden)"
-          fi
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
       - name: Run SonarQube Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL}}
         run: |
           export PATH=$PATH:/home/appserver/sonar-scanner-7.2.0.5079-linux-x64/bin
           sonar-scanner \
@@ -64,7 +55,7 @@ jobs:
             -Dsonar.projectName=pygoat \
             -Dsonar.projectVersion=1.0 \
             -Dsonar.sources=. \
-            -Dsonar.host.url=http://192.168.58.13:9000 \
+            -Dsonar.host.url=$SONAR_HOST_URL \
             -Dsonar.token=$SONAR_TOKEN \
             -Dsonar.test.inclusions=./
             -Dsonar.sourceEncoding=utf-8
