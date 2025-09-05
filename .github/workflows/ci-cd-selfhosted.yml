@@ -1,10 +1,10 @@
 name: CI-CD DevSecOps - Self-Hosted Runner (PyGoat)
 
 on:
-  push:
-    branches: [ "master", "main" ]
-  pull_request:
-    branches: [ "master", "main" ]
+  # push:
+  #   branches: [ "master", "main" ]
+  # pull_request:
+  #   branches: [ "master", "main" ]
   workflow_dispatch:
 
 # least privilege permissions for this workflow
