@@ -54,8 +54,9 @@ jobs:
             -Dsonar.projectKey=pygoat \
             -Dsonar.projectName=pygoat \
             -Dsonar.projectVersion=1.0 \
-            -Dsonar.sources=. \
+            -Dsonar.sources=./ \
+            -Dsonar.test.inclusions=./ \
+            -Dsonar.sourceEncoding=UTF-8 \
             -Dsonar.host.url=$SONAR_HOST_URL \
             -Dsonar.token=$SONAR_TOKEN \
-            -Dsonar.python.version=3.8 \
-            -Dsonar.coverageReportPaths=coverage.xml
+            -Dsonar.python.version=3.8
