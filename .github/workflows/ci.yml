@@ -50,7 +50,9 @@ jobs:
         run: |
           export PATH=$PATH:/home/appserver/sonar-scanner-7.2.0.5079-linux-x64/bin
           sonar-scanner \
-            -Dsonar.projectKey=my-python-project \
+            -Dsonar.projectKey=pygoat \
+            -Dsonar.projectName=pygoat \
+            -Dsonar.projectVersion=1.0 \
             -Dsonar.sources=. \
             -Dsonar.host.url=http://192.168.58.13:9000 \
             -Dsonar.login=$SONAR_TOKEN \
