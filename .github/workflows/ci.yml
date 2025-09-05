@@ -44,6 +44,16 @@ jobs:
           fi
         shell: bash
 
+      - name: Debug SONAR_TOKEN presence
+        run: |
+          if [ -z "$SONAR_TOKEN" ]; then
+            echo "❌ SONAR_TOKEN is not set"
+          else
+            echo "✅ SONAR_TOKEN is set (hidden)"
+          fi
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
       - name: Run SonarQube Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -56,5 +66,5 @@ jobs:
             -Dsonar.sources=. \
             -Dsonar.host.url=http://192.168.58.13:9000 \
             -Dsonar.token=$SONAR_TOKEN \
-            -Dsonar.python.version=3.8 \
-            -Dsonar.coverageReportPaths=coverage.xml
+            -Dsonar.test.inclusions=./
+            -Dsonar.sourceEncoding=utf-8
