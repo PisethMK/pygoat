@@ -2,7 +2,8 @@ name: SonarQube SAST Scan
 
 on:
   push:
-     branches: [ "master", "main" ]
+     branches: [ "master", "main" ]  
+  workflow_dispatch:
 #  pull_request:
 #    branches: [ "master", "main" ]
 
@@ -31,10 +32,10 @@ jobs:
 
       # - name: Run Unit Tests (optional but recommended)
       #   run: pytest --maxfail=5 --disable-warnings -q
-      
+
       - name: Install Sonar Scanner
         run: |
-          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-7.2.0.5079-linux-x64.zip
           unzip sonar-scanner-cli-*.zip -d $HOME
           export PATH=$HOME/sonar-scanner-*/bin:$PATH
 
