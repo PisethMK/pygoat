@@ -43,6 +43,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
+          export PATH=$PATH:/home/appserver/sonar-scanner-7.2.0.5079-linux-x64/bin
           sonar-scanner \
             -Dsonar.projectKey=my-python-project \
             -Dsonar.sources=. \
