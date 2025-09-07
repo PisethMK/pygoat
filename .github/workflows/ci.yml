@@ -64,8 +64,37 @@ jobs:
             --header 'Authorization: Bearer $SONAR_TOKEN' \
             -o sonar-report.json
 
-      - name: Upload report as artifact
+      - name: Convert JSON to HTML report
+        run: |
+          python <<'EOF'
+          import json
+          from pathlib import Path
+
+          data = json.load(open("sonar-report.json"))
+          issues = data.get("issues", [])
+
+          html = ["<html><head><title>SonarQube Report</title></head><body>"]
+          html.append("<h1>SonarQube Issues Report</h1>")
+          html.append(f"<p>Total Issues: {len(issues)}</p>")
+          html.append("<table border='1' cellspacing='0' cellpadding='5'>")
+          html.append("<tr><th>Severity</th><th>Type</th><th>Message</th><th>File</th><th>Line</th></tr>")
+
+          for issue in issues:
+              comp = issue.get("component", "N/A").split(":")[-1]
+              html.append(f"<tr>"
+                          f"<td>{issue.get('severity')}</td>"
+                          f"<td>{issue.get('type')}</td>"
+                          f"<td>{issue.get('message')}</td>"
+                          f"<td>{comp}</td>"
+                          f"<td>{issue.get('line', '')}</td>"
+                          f"</tr>")
+          html.append("</table></body></html>")
+
+          Path("sonar-report.html").write_text("\n".join(html), encoding="utf-8")
+          EOF
+
+      - name: Upload SonarQube HTML report
         uses: actions/upload-artifact@v4
         with:
-          name: sonar-report
-          path: sonar-report.json
+          name: sonar-html-report
+          path: sonar-report.html
