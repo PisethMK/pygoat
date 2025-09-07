@@ -164,5 +164,3 @@ jobs:
             mkdir -p ${{env.TARGET_FOLDER}}
             cd ${{env.TARGET_FOLDER}}
             docker pull ${{env.DOCKERHUB_USERNAME}}/pygoat:latest
-            docker-compose down || true
-            docker-compose up -d --build
