@@ -9,9 +9,15 @@ on:
 env:
   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+  TARGET_HOST: ${{ secrets.TARGET_HOST }}
+  TARGET_USER: ${{ secrets.TARGET_USER }}
+  TARGET_SSH_KEY: ${{ secrets.TARGET_SSH_KEY }}
+  TARGET_FOLDER: /home/appserver/pygoat   # Target folder on server
 
 jobs:
-  sonarqube:
+  ci:
     name: SonarQube Analysis
     runs-on: self-hosted   # your self-hosted runner
     
@@ -126,3 +132,37 @@ jobs:
         with:
           name: sonar-html-report
           path: sonar-report.html
+  
+  
+  cd:
+    name: Docker Deploy
+    needs: ci
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push Docker image
+        run: |
+          docker build -t $DOCKERHUB_USERNAME/pygoat:latest .
+          docker push $DOCKERHUB_USERNAME/pygoat:latest
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.TARGET_HOST }}
+          username: ${{ secrets.TARGET_USER }}
+          key: ${{ secrets.TARGET_SSH_KEY }}
+          script: |
+            mkdir -p $TARGET_FOLDER
+            cd $TARGET_FOLDER
+            docker pull $DOCKERHUB_USERNAME/pygoat:latest
+            docker-compose down || true
+            docker-compose up -d --build
