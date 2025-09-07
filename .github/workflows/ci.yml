@@ -2,15 +2,14 @@ name: SonarQube SAST Scan
 
 on:
   push:
-     branches: [ "master", "main" ]  
+    branches: [ "master", "main" ]
+  pull_request:      # 👈 also run on PRs so developers see results inline
   workflow_dispatch:
-#  pull_request:
-#    branches: [ "master", "main" ]
 
 jobs:
   sonarqube:
     name: SonarQube Analysis
-    runs-on: self-hosted   # use your self-hosted runner
+    runs-on: self-hosted   # your self-hosted runner
 
     steps:
       - name: Checkout source
@@ -21,7 +20,6 @@ jobs:
         with:
           python-version: 3.8
 
-      # You can test your matrix by printing the current Python version
       - name: Display Python version
         run: python -c "import sys; print(sys.version)"
 
@@ -29,9 +27,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-      # - name: Run Unit Tests (optional but recommended)
-      #   run: pytest --maxfail=5 --disable-warnings -q
 
       - name: Install Sonar Scanner
         run: |
@@ -47,7 +42,7 @@ jobs:
       - name: Run SonarQube Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL}}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: |
           export PATH=$PATH:/home/appserver/sonar-scanner-7.2.0.5079-linux-x64/bin
           sonar-scanner \
@@ -60,3 +55,11 @@ jobs:
             -Dsonar.host.url=$SONAR_HOST_URL \
             -Dsonar.token=$SONAR_TOKEN \
             -Dsonar.python.version=3.8
+
+      # ⬇️ New step: Post results from SonarQube back to GitHub
+      - name: SonarQube Report
+        uses: sonarsource/sonarqube-report-action@v1
+        with:
+          host: ${{ secrets.SONAR_HOST_URL }}
+          token: ${{ secrets.SONAR_TOKEN }}
+          projectKey: pygoat
