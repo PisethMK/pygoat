@@ -67,23 +67,28 @@ jobs:
       - name: Generate HTML Report from JSON
         run: |
           python <<'EOF'
-          import importlib, subprocess, sys
-
-          def ensure_package(pkg):
-              try:
-                  importlib.import_module(pkg)
-              except ImportError:
-                  print(f"⚠️ {pkg} not found. Installing...")
-                  subprocess.check_call([sys.executable, "-m", "pip", "install", pkg])
-
-          # Standard library (json, pathlib) don’t need checks, 
-          # but here's how you'd handle extras like `jinja2` or `pandas`.
-          # ensure_package("jinja2")
-
           import json
           from pathlib import Path
 
-          data = json.load(open("sonar-report.json"))
+          report_file = Path("sonar-report.json")
+          if not report_file.exists() or report_file.stat().st_size == 0:
+              print("⚠️ sonar-report.json is missing or empty.")
+              Path("sonar-report.html").write_text(
+                  "<html><body><h2>No SonarQube issues found or report unavailable.</h2></body></html>",
+                  encoding="utf-8"
+              )
+              exit(0)
+
+          try:
+              data = json.loads(report_file.read_text(encoding="utf-8"))
+          except json.JSONDecodeError as e:
+              print(f"⚠️ Failed to parse sonar-report.json: {e}")
+              Path("sonar-report.html").write_text(
+                  f"<html><body><h2>Invalid JSON in sonar-report.json</h2><pre>{e}</pre></body></html>",
+                  encoding="utf-8"
+              )
+              exit(1)
+
           issues = data.get("issues", [])
 
           html = [
