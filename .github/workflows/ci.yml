@@ -56,10 +56,14 @@ jobs:
             -Dsonar.token=$SONAR_TOKEN \
             -Dsonar.python.version=3.8
 
-      # ⬇️ New step: Post results from SonarQube back to GitHub
-      - name: SonarQube Report
-        uses: sonarsource/sonarqube-report-action@v1
+      - name: Fetch SonarQube issues
+        run: |
+          curl -u ${{ secrets.SONAR_TOKEN }} \
+            "${{ secrets.SONARQUBE_URL }}/api/issues/search?componentKeys=nodemultiplayersnake" \
+            -o sonar-report.json
+
+      - name: Upload report as artifact
+        uses: actions/upload-artifact@v4
         with:
-          host: ${{ secrets.SONAR_HOST_URL }}
-          token: ${{ secrets.SONAR_TOKEN }}
-          projectKey: pygoat
+          name: sonar-report
+          path: sonar-report.json
