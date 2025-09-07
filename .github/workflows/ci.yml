@@ -69,3 +69,60 @@ jobs:
         with:
           name: sonar-json-report
           path: sonar-report.json
+
+      - name: Generate HTML Report from JSON
+        run: |
+          python <<'EOF'
+          import json
+          from pathlib import Path
+
+          report_file = Path("sonar-report.json")
+          if not report_file.exists() or report_file.stat().st_size == 0:
+              print("⚠️ sonar-report.json is missing or empty.")
+              Path("sonar-report.html").write_text(
+                  "<html><body><h2>No SonarQube issues found or report unavailable.</h2></body></html>",
+                  encoding="utf-8"
+              )
+              exit(0)
+
+          try:
+              data = json.loads(report_file.read_text(encoding="utf-8"))
+          except json.JSONDecodeError as e:
+              print(f"⚠️ Failed to parse sonar-report.json: {e}")
+              Path("sonar-report.html").write_text(
+                  f"<html><body><h2>Invalid JSON in sonar-report.json</h2><pre>{e}</pre></body></html>",
+                  encoding="utf-8"
+              )
+              exit(1)
+
+          issues = data.get("issues", [])
+
+          html = [
+              "<html><head><title>SonarQube Report</title></head><body>",
+              "<h1>SonarQube Issues Report</h1>",
+              f"<p>Total Issues: {len(issues)}</p>",
+              "<table border='1' cellspacing='0' cellpadding='5'>",
+              "<tr><th>Severity</th><th>Type</th><th>Message</th><th>File</th><th>Line</th></tr>"
+          ]
+
+          for issue in issues:
+              comp = issue.get("component", "N/A").split(":")[-1]
+              html.append(
+                  f"<tr>"
+                  f"<td>{issue.get('severity')}</td>"
+                  f"<td>{issue.get('type')}</td>"
+                  f"<td>{issue.get('message')}</td>"
+                  f"<td>{comp}</td>"
+                  f"<td>{issue.get('line', '')}</td>"
+                  f"</tr>"
+              )
+
+          html.append("</table></body></html>")
+          Path("sonar-report.html").write_text("\n".join(html), encoding="utf-8")
+          EOF
+
+      - name: Upload SonarQube HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonar-html-report
+          path: sonar-report.html
