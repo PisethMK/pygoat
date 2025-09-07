@@ -69,6 +69,7 @@ jobs:
         with:
           name: sonar-json-report
           path: sonar-report.json
+          compression-level: 0   # 👈 disables zipping
 
       - name: Generate HTML Report from JSON
         run: |
@@ -126,3 +127,4 @@ jobs:
         with:
           name: sonar-html-report
           path: sonar-report.html
+          compression-level: 0   # 👈 disables zipping
