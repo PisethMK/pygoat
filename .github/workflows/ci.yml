@@ -63,7 +63,13 @@ jobs:
             --url "$SONAR_HOST_URL/api/issues/search?componentKeys=nodemultiplayersnake" \
             --header 'Authorization: Bearer $SONAR_TOKEN' \
             -o sonar-report.json
-            
+
+      - name: Upload SonarQube Json report
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonar-json-report
+          path: sonar-report.json
+
       - name: Generate HTML Report from JSON
         run: |
           python <<'EOF'
