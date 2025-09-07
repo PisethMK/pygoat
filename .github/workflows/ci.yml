@@ -61,7 +61,7 @@ jobs:
         run: |
           curl --request GET \
             --url "$SONAR_HOST_URL/api/issues/search?componentKeys=nodemultiplayersnake" \
-            --header 'Authorization: Bearer $SONAR_TOKEN'
+            --header 'Authorization: Bearer $SONAR_TOKEN' \
             -o sonar-report.json
 
       - name: Upload report as artifact
