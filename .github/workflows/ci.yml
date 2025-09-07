@@ -63,33 +63,50 @@ jobs:
             --url "$SONAR_HOST_URL/api/issues/search?componentKeys=nodemultiplayersnake" \
             --header 'Authorization: Bearer $SONAR_TOKEN' \
             -o sonar-report.json
-
-      - name: Convert JSON to HTML report
+            
+      - name: Generate HTML Report from JSON
         run: |
           python <<'EOF'
+          import importlib, subprocess, sys
+
+          def ensure_package(pkg):
+              try:
+                  importlib.import_module(pkg)
+              except ImportError:
+                  print(f"⚠️ {pkg} not found. Installing...")
+                  subprocess.check_call([sys.executable, "-m", "pip", "install", pkg])
+
+          # Standard library (json, pathlib) don’t need checks, 
+          # but here's how you'd handle extras like `jinja2` or `pandas`.
+          # ensure_package("jinja2")
+
           import json
           from pathlib import Path
 
           data = json.load(open("sonar-report.json"))
           issues = data.get("issues", [])
 
-          html = ["<html><head><title>SonarQube Report</title></head><body>"]
-          html.append("<h1>SonarQube Issues Report</h1>")
-          html.append(f"<p>Total Issues: {len(issues)}</p>")
-          html.append("<table border='1' cellspacing='0' cellpadding='5'>")
-          html.append("<tr><th>Severity</th><th>Type</th><th>Message</th><th>File</th><th>Line</th></tr>")
+          html = [
+              "<html><head><title>SonarQube Report</title></head><body>",
+              "<h1>SonarQube Issues Report</h1>",
+              f"<p>Total Issues: {len(issues)}</p>",
+              "<table border='1' cellspacing='0' cellpadding='5'>",
+              "<tr><th>Severity</th><th>Type</th><th>Message</th><th>File</th><th>Line</th></tr>"
+          ]
 
           for issue in issues:
               comp = issue.get("component", "N/A").split(":")[-1]
-              html.append(f"<tr>"
-                          f"<td>{issue.get('severity')}</td>"
-                          f"<td>{issue.get('type')}</td>"
-                          f"<td>{issue.get('message')}</td>"
-                          f"<td>{comp}</td>"
-                          f"<td>{issue.get('line', '')}</td>"
-                          f"</tr>")
-          html.append("</table></body></html>")
+              html.append(
+                  f"<tr>"
+                  f"<td>{issue.get('severity')}</td>"
+                  f"<td>{issue.get('type')}</td>"
+                  f"<td>{issue.get('message')}</td>"
+                  f"<td>{comp}</td>"
+                  f"<td>{issue.get('line', '')}</td>"
+                  f"</tr>"
+              )
 
+          html.append("</table></body></html>")
           Path("sonar-report.html").write_text("\n".join(html), encoding="utf-8")
           EOF
 
