@@ -58,8 +58,9 @@ jobs:
 
       - name: Fetch SonarQube issues
         run: |
-          curl -u ${{ secrets.SONAR_TOKEN }} \
-            "${{ secrets.SONARQUBE_URL }}/api/issues/search?componentKeys=nodemultiplayersnake" \
+          curl --request GET \
+            --url "${{ secrets.SONARQUBE_URL }}/api/issues/search?componentKeys=nodemultiplayersnake" \
+            --header 'Authorization: Bearer ${{ secrets.SONAR_TOKEN }}'
             -o sonar-report.json
 
       - name: Upload report as artifact
