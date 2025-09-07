@@ -154,6 +154,17 @@ jobs:
           docker build -t ${{env.DOCKERHUB_USERNAME}}/pygoat:latest .
           docker push ${{env.DOCKERHUB_USERNAME}}/pygoat:latest
 
+      - name: Run Docker Scout Scan  🔍
+        run: |
+          docker scout quickview ${{env.DOCKERHUB_USERNAME}}/pygoat:latest
+          docker scout cves ${{env.DOCKERHUB_USERNAME}}/pygoat:latest > scout-report.txt
+
+      - name: Upload Docker Scout Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-scout-report
+          path: scout-report.txt
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v0.1.7
         with:
