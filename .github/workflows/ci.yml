@@ -6,11 +6,15 @@ on:
   pull_request:      # 👈 also run on PRs so developers see results inline
   workflow_dispatch:
 
+env:
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
 jobs:
   sonarqube:
     name: SonarQube Analysis
     runs-on: self-hosted   # your self-hosted runner
-
+    
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -40,9 +44,6 @@ jobs:
         shell: bash
 
       - name: Run SonarQube Scan
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: |
           export PATH=$PATH:/home/appserver/sonar-scanner-7.2.0.5079-linux-x64/bin
           sonar-scanner \
