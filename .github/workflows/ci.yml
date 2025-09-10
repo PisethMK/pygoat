@@ -62,6 +62,11 @@ jobs:
             -Dsonar.host.url=${{env.SONAR_HOST_URL}} \
             -Dsonar.token=${{env.SONAR_TOKEN}} \
             -Dsonar.python.version=3.8
+            
+      - name: Wait for SonarQube Quality Gate
+        uses: sonarsource/sonarqube-quality-gate-action@v1
+        with:
+          scanMetadataReportFile: .scannerwork/report-task.txt
 
       - name: Fetch SonarQube issues
         run: |
